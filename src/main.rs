@@ -11,12 +11,16 @@ struct Handler;
 
 impl EventHandler for Handler {}
 
-fn main() {
+fn main() -> Result<(), ::serenity::Error> {
     let mut client = Client::new(
         &env::var("DISCORD_TOKEN").expect("discord token"),
-        Handler);
+        Handler)?;
+    if let Err(e) = client.start() {
+        eprintln!("Failed to start client! {}", e)
+    }
+    Ok(())
 }
 
 command!(ping(_context, msg) {
     let _ = msg.reply("Pong");
-})
+});
