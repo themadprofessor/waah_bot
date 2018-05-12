@@ -7,7 +7,8 @@ extern crate failure;
 
 use serenity::prelude::*;
 use serenity::{
-    Client
+    Client,
+    model::channel::Message
 };
 use failure::Error;
 
@@ -15,7 +16,15 @@ mod conf;
 
 struct Handler;
 
-impl EventHandler for Handler {}
+impl EventHandler for Handler {
+    fn message(&self, ctx: Context, msg: Message) {
+        if msg.content.as_bytes()[0] == '~' as u8 {
+            if msg.content == "~ping" {
+                msg.reply("Pong").unwrap();
+            }
+        }
+    }
+}
 
 fn run() -> Result<(), Error> {
     let conf = {
@@ -34,10 +43,12 @@ fn run() -> Result<(), Error> {
         #[cfg(debug_assertions)] config.merge(::config::File::with_name("token.toml"))?; //Only include token.toml if this a test scenario
         conf::Config::from_conf(config)
     }?;
+    println!("Config loaded");
 
     let mut client = Client::new(
         &conf.discord_token,
         Handler).map_err(|e| ::failure::err_msg(format!("{}", e)))?;
+    println!("Client starting");
     if let Err(e) = client.start() {
         eprintln!("Failed to start client! {}", e)
     }
@@ -53,7 +64,3 @@ fn main() -> ::std::process::ExitCode {
         }
     }
 }
-
-command!(ping(_context, msg) {
-    let _ = msg.reply("Pong");
-});
