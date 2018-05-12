@@ -1,24 +1,57 @@
+#![feature(process_exitcode_placeholder)]
+
 #[macro_use] extern crate serenity;
+extern crate config;
+extern crate directories;
+extern crate failure;
 
 use serenity::prelude::*;
 use serenity::{
     Client
 };
+use failure::Error;
 
-use std::env; // To be replaced by config
+mod conf;
 
 struct Handler;
 
 impl EventHandler for Handler {}
 
-fn main() -> Result<(), ::serenity::Error> {
+fn run() -> Result<(), Error> {
+    let conf = {
+        let project_dirs = ::directories::ProjectDirs::from("io", "waluigi", "waah_bot");
+        let mut config = ::config::Config::new();
+        let paths = [project_dirs.data_dir(),
+            project_dirs.data_local_dir(),
+            project_dirs.config_dir()];
+
+        for &path in paths.iter() {
+            if path.exists() {
+                config.merge(config::File::with_name(path.to_str().unwrap()))?;
+            }
+        }
+        config.merge(::config::Environment::with_prefix("waah"))?;
+        #[cfg(debug_assertions)] config.merge(::config::File::with_name("token.toml"))?; //Only include token.toml if this a test scenario
+        conf::Config::from_conf(config)
+    }?;
+
     let mut client = Client::new(
-        &env::var("DISCORD_TOKEN").expect("discord token"),
-        Handler)?;
+        &conf.discord_token,
+        Handler).map_err(|e| ::failure::err_msg(format!("{}", e)))?;
     if let Err(e) = client.start() {
         eprintln!("Failed to start client! {}", e)
     }
     Ok(())
+}
+
+fn main() -> ::std::process::ExitCode {
+    match run() {
+        Ok(_) => ::std::process::ExitCode::SUCCESS,
+        Err(e) => {
+            eprintln!("{}", e);
+            ::std::process::ExitCode::FAILURE
+        }
+    }
 }
 
 command!(ping(_context, msg) {
