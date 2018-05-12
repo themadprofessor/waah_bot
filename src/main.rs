@@ -1,0 +1,22 @@
+#[macro_use] extern crate serenity;
+
+use serenity::prelude::*;
+use serenity::{
+    Client
+};
+
+use std::env; // To be replaced by config
+
+struct Handler;
+
+impl EventHandler for Handler {}
+
+fn main() {
+    let mut client = Client::new(
+        &env::var("DISCORD_TOKEN").expect("discord token"),
+        Handler);
+}
+
+command!(ping(_context, msg) {
+    let _ = msg.reply("Pong");
+})

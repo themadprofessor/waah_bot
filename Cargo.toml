@@ -1,0 +1,7 @@
+[package]
+name = "waah_bot"
+version = "0.1.0"
+authors = ["Stuart <stu@reilly-family.co.uk>"]
+
+[dependencies]
+serenity = "0.5"
