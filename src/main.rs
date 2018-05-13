@@ -12,17 +12,16 @@ use serenity::{
 };
 use failure::Error;
 
+use std::collections::HashMap;
+use std::ops::Fn;
+
 mod conf;
 
-struct Handler;
+struct Handler {}
 
 impl EventHandler for Handler {
     fn message(&self, ctx: Context, msg: Message) {
-        if msg.content.as_bytes()[0] == '~' as u8 {
-            if msg.content == "~ping" {
-                msg.reply("Pong").unwrap();
-            }
-        }
+        unimplemented!()
     }
 }
 
@@ -40,14 +39,15 @@ fn run() -> Result<(), Error> {
             }
         }
         config.merge(::config::Environment::with_prefix("waah"))?;
-        #[cfg(debug_assertions)] config.merge(::config::File::with_name("token.toml"))?; //Only include token.toml if this a test scenario
+        #[cfg(debug_assertions)] config.merge(::config::File::with_name("debug.toml"))?; //Only include debug.toml if this a test scenario
         conf::Config::from_conf(config)
     }?;
     println!("Config loaded");
 
     let mut client = Client::new(
         &conf.discord_token,
-        Handler).map_err(|e| ::failure::err_msg(format!("{}", e)))?;
+        Handler{}
+    ).map_err(|e| ::failure::err_msg(format!("{}", e)))?;
     println!("Client starting");
     if let Err(e) = client.start() {
         eprintln!("Failed to start client! {}", e)
@@ -63,4 +63,8 @@ fn main() -> ::std::process::ExitCode {
             ::std::process::ExitCode::FAILURE
         }
     }
+}
+
+fn pong() {
+
 }
