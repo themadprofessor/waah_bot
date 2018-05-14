@@ -43,6 +43,7 @@ impl EventHandler for Handler {
                         "ping" => ::cmd::ping(&msg),
                         "wah" => ::cmd::wah(&msg, split),
                         "img" => ::cmd::img(&msg, &self.imgur),
+                        "help" => ::cmd::help(&msg),
                         _ => {}
                     }
                 },
@@ -54,7 +55,7 @@ impl EventHandler for Handler {
 
 fn run() -> Result<(), Error> {
     let conf = {
-        let project_dirs = ::directories::ProjectDirs::from("io", "discord", "discord_bot");
+        let project_dirs = ::directories::ProjectDirs::from("io", "discord", "waah_bot");
         let mut config = ::config::Config::new();
         let paths = [project_dirs.data_dir(),
             project_dirs.data_local_dir(),
