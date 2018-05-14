@@ -1,6 +1,6 @@
 #![feature(process_exitcode_placeholder)]
 
-#[macro_use] extern crate serenity;
+extern crate serenity;
 extern crate config;
 extern crate directories;
 extern crate failure;
@@ -13,6 +13,7 @@ use serenity::{
 use failure::Error;
 
 mod conf;
+mod cmd;
 
 struct Handler {
     conf: conf::Config,
@@ -25,29 +26,14 @@ impl Handler {
 }
 
 impl EventHandler for Handler {
-    fn message(&self, ctx: Context, msg: Message) {
+    fn message(&self, _ctx: Context, msg: Message) {
         if msg.content.starts_with(&self.conf.cmd_char) {
             let mut split = msg.content[self.conf.cmd_char.len()..].split(' ');
             match &split.next() {
                 Some(cmd) => {
                     match *cmd {
-                        "ping" => {msg.reply("pong").expect("Failed to send response");},
-                        "wah" => {
-                            match split.next().unwrap_or("").parse::<u64>() {
-                                Ok(count) => {
-                                    let mut s = String::with_capacity(2 + count);
-                                    s += "W";
-                                    for _ in 0..count {
-                                        s += "A"
-                                    }
-                                    s += "H";
-                                    msg.reply(&s).expect("Failed to send response");
-                                },
-                                Err(e) => {
-                                    msg.reply("Wat").expect("Failed to send response");
-                                }
-                            }
-                        }
+                        "ping" => ::cmd::ping(&msg),
+                        "wah" => ::cmd::wah(&msg, split),
                         _ => {}
                     }
                 },
