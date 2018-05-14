@@ -12,22 +12,54 @@ use serenity::{
 };
 use failure::Error;
 
-use std::collections::HashMap;
-use std::ops::Fn;
-
 mod conf;
 
-struct Handler {}
+struct Handler {
+    conf: conf::Config,
+}
+
+impl Handler {
+    pub fn new(conf: conf::Config) -> Handler {
+        Handler {conf}
+    }
+}
 
 impl EventHandler for Handler {
     fn message(&self, ctx: Context, msg: Message) {
-        unimplemented!()
+        if msg.content.starts_with(&self.conf.cmd_char) {
+            let mut split = msg.content[self.conf.cmd_char.len()..].split(' ');
+            match &split.next() {
+                Some(cmd) => {
+                    match *cmd {
+                        "ping" => {msg.reply("pong").expect("Failed to send response");},
+                        "wah" => {
+                            match split.next().unwrap_or("").parse::<u64>() {
+                                Ok(count) => {
+                                    let mut s = String::with_capacity(2 + count);
+                                    s += "W";
+                                    for _ in 0..count {
+                                        s += "A"
+                                    }
+                                    s += "H";
+                                    msg.reply(&s).expect("Failed to send response");
+                                },
+                                Err(e) => {
+                                    msg.reply("Wat").expect("Failed to send response");
+                                }
+                            }
+                        }
+                        _ => {}
+                    }
+                },
+                None => ()
+            }
+        }
     }
 }
 
 fn run() -> Result<(), Error> {
     let conf = {
-        let project_dirs = ::directories::ProjectDirs::from("io", "waluigi", "waah_bot");
+        let project_dirs = ::directories::ProjectDirs::from("io", "discord", "discord_bot");
         let mut config = ::config::Config::new();
         let paths = [project_dirs.data_dir(),
             project_dirs.data_local_dir(),
@@ -45,8 +77,8 @@ fn run() -> Result<(), Error> {
     println!("Config loaded");
 
     let mut client = Client::new(
-        &conf.discord_token,
-        Handler{}
+        &conf.discord_token.clone(),
+        Handler::new(conf)
     ).map_err(|e| ::failure::err_msg(format!("{}", e)))?;
     println!("Client starting");
     if let Err(e) = client.start() {
@@ -63,8 +95,4 @@ fn main() -> ::std::process::ExitCode {
             ::std::process::ExitCode::FAILURE
         }
     }
-}
-
-fn pong() {
-
 }
