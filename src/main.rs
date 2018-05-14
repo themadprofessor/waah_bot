@@ -4,6 +4,10 @@ extern crate serenity;
 extern crate config;
 extern crate directories;
 extern crate failure;
+extern crate reqwest;
+extern crate serde;
+extern crate rand;
+#[macro_use] extern crate serde_derive;
 
 use serenity::prelude::*;
 use serenity::{
@@ -14,26 +18,31 @@ use failure::Error;
 
 mod conf;
 mod cmd;
+mod imgur;
 
 struct Handler {
     conf: conf::Config,
+    imgur: imgur::Imgur
 }
 
 impl Handler {
     pub fn new(conf: conf::Config) -> Handler {
-        Handler {conf}
+        let imgur = imgur::Imgur::new(&conf).unwrap();
+        Handler {conf, imgur}
     }
 }
 
 impl EventHandler for Handler {
     fn message(&self, _ctx: Context, msg: Message) {
         if msg.content.starts_with(&self.conf.cmd_char) {
+            println!("Command recieved");
             let mut split = msg.content[self.conf.cmd_char.len()..].split(' ');
             match &split.next() {
                 Some(cmd) => {
                     match *cmd {
                         "ping" => ::cmd::ping(&msg),
                         "wah" => ::cmd::wah(&msg, split),
+                        "img" => ::cmd::img(&msg, &self.imgur),
                         _ => {}
                     }
                 },
