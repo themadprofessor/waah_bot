@@ -1,19 +1,48 @@
-use failure::Error;
+use config::Config as Conf;
+use config::ConfigError;
+use thiserror::Error;
+use secstr::SecUtf8;
+use serde::Deserializer;
 
-#[derive(Debug, Clone, Hash, PartialEq)]
-pub struct Config {
-    pub discord_token: String,
-    pub cmd_char: String,
-    pub imgur_id: String
-    //map: HashMap<&'a str, Vec<&'a str>>
+#[derive(Error, Debug)]
+pub enum Error {
+    #[error(transparent)]
+    Config(#[from] ConfigError),
+    #[error("platform does not have a valid home directory")]
+    Platform,
 }
 
+#[derive(Deserialize)]
+pub struct Config {
+    token: SecUt8,
+}
+
+static PREFIX: &'static str = "waah_";
+static QUALIFIER: &'static str = "io";
+static ORGANISATION: &'static str = "themadprofessor";
+static APPLICATION: &'static str = "waah_bot";
+
 impl Config {
-    pub fn from_conf(conf: ::config::Config) -> Result<Config, Error> {
-        Ok(Config {
-            discord_token: conf.get_str("discord_token").map_err(|_| ::failure::err_msg("No discord token found"))?,
-            cmd_char: conf.get_str("cmd_char").map_err(|_| ::failure::err_msg("No command char given"))?,
-            imgur_id: conf.get("imgur_id").map_err(|_| ::failure::err_msg("No imgur id given"))?,
-        })
+    pub fn new() -> Result<Config, Error> {
+        let dirs = directories::ProjectDirs::from(QUALIFIER, ORGANISATION, APPLICATION)
+            .ok_or_else(|| Error::Platform)?;
+
+        let mut conf = Conf::new();
+
+        conf.merge(config::File::with_name(
+            dirs.config_dir()
+                .join(APPLICATION + ".toml")
+                .to_str()
+                .unwrap(),
+        ))
+        .map_err(Error::Config)?;
+        conf.merge(config::Environment::with_prefix(PREFIX))
+            .map_err(Error::Config)?;
+
+        conf.try_into().map_err(Error::Config)
     }
+}
+
+fn deserialize_secstr<'de, D>(de: D) -> Result<SecUt8, D::Error> where D: Deserializer<'de> {
+    String::deserialize(de)?.into()
 }

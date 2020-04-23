@@ -1,14 +1,28 @@
 [package]
-name = "discord_bot"
+name = "waah_bot"
 version = "0.1.0"
 authors = ["Stuart <stu@reilly-family.co.uk>"]
+edition = "2018"
 
 [dependencies]
-serenity = "0.5"
-config = "0.8"
-directories = "0.10"
-failure = "0.1"
-reqwest = "0.8"
+config = { version = "0.10", default-features = false, features = ["toml"]}
+directories = "2.0.2"
+thiserror = "1.0.15"
 serde = "1.0"
 serde_derive = "1.0"
-rand = "0.4"
+secstr = "0.4.0"
+
+[dependencies.serenity]
+version = "0.8.5"
+features = [
+    "builder",
+    "client",
+    "framework",
+    "gateway",
+    "http",
+    "model",
+    "standard_framework",
+    "utils",
+    "rustls_backend",
+]
+default-features = false
