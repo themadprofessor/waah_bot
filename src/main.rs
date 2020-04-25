@@ -5,16 +5,16 @@ mod conf;
 mod imgur;
 use crate::imgur::Imgur;
 use conf::Config;
+use fern::Dispatch;
 use log::{debug, error, info, warn};
 use serenity::framework::standard::macros::{command, group, help};
 use serenity::framework::standard::{
-    help_commands::*, Args, CommandError, CommandGroup, CommandResult, HelpOptions,
+    help_commands::*, Args, CommandGroup, CommandResult, HelpOptions,
 };
 use serenity::framework::StandardFramework;
 use serenity::model::channel::Message;
 use serenity::model::prelude::*;
 use std::collections::HashSet;
-use fern::Dispatch;
 
 #[group]
 #[commands(pic)]
@@ -76,12 +76,7 @@ fn main() {
 fn setup_logging(conf: &Config) {
     Dispatch::new()
         .format(|out, msg, rec| {
-            out.finish(format_args!(
-                "[{}][{}] {}",
-                rec.level(),
-                rec.target(),
-                msg
-            ))
+            out.finish(format_args!("[{}][{}] {}", rec.level(), rec.target(), msg))
         })
         .level(conf.log_level)
         .chain(::std::io::stdout())
@@ -115,6 +110,8 @@ fn pic(ctx: &mut Context, msg: &Message) -> CommandResult {
 }
 
 #[help]
+#[command_not_found_text = "Waaaaaaaht?"]
+#[no_help_available_text = "Waaaaaaaht?"]
 fn my_help(
     context: &mut Context,
     msg: &Message,

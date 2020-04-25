@@ -1,9 +1,9 @@
 use config::Config as Conf;
 use config::ConfigError;
+use log::LevelFilter;
 use secstr::SecUtf8;
 use serde::Deserialize;
 use thiserror::Error;
-use log::LevelFilter;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -18,7 +18,7 @@ pub struct Config {
     pub discord_token: SecUtf8,
     pub imgur_id: String,
     #[serde(default = "default_log_level")]
-    pub log_level: LevelFilter
+    pub log_level: LevelFilter,
 }
 
 const PREFIX: &str = "waah_";
