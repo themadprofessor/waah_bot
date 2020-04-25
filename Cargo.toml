@@ -15,3 +15,5 @@ serenity = "0.8"
 reqwest = { version = "0.10.4", features = ["blocking"] }
 rand = "0.7.3"
 lazy_static = "1.4.0"
+log = { version = "0.4.8", features = ["serde"] }
+fern = "0.6.0"

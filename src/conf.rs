@@ -3,6 +3,7 @@ use config::ConfigError;
 use secstr::SecUtf8;
 use serde::Deserialize;
 use thiserror::Error;
+use log::LevelFilter;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -16,6 +17,8 @@ pub enum Error {
 pub struct Config {
     pub discord_token: SecUtf8,
     pub imgur_id: String,
+    #[serde(default = "default_log_level")]
+    pub log_level: LevelFilter
 }
 
 const PREFIX: &str = "waah_";
@@ -37,4 +40,8 @@ impl Config {
 
         conf.try_into().map_err(Error::Config)
     }
+}
+
+fn default_log_level() -> LevelFilter {
+    LevelFilter::Warn
 }
