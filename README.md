@@ -17,10 +17,20 @@ A Waluigi-insipred Discord bot written in Rust, using the serenity library.
 
 ## Install
 
+To install:
+
 ```
-git clone https://github.com/themadprofessor/waah_bot.git
-cd waah_bot
 cargo install
+```
+
+To cross compile, use [cross](https://github.com/rust-embedded/cross):
+```
+cross build --target <target triple>
+```
+
+For example, to cross compile Waah Bot the Raspberry PI 1:
+```
+cross build --target arm-unknown-linux-gnueabihf
 ```
 
 ## Usage
@@ -38,7 +48,7 @@ Essentially, it looks for `waah_bot.toml` in the following locations:
 | Windows  | `{FOLDERID_RoamingAppData}\waah_bot`                    |
 
 `waah_bot.toml` should have the following format:
-```toml
+```
 imgur_id = String
 discord_token = String
 log_level = OFF | ERROR | WARN | INFO | DEBUG | TRACE
