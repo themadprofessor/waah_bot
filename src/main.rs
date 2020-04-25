@@ -1,3 +1,4 @@
+#![forbid(unsafe_code)]
 use serenity::prelude::*;
 use serenity::Client;
 
