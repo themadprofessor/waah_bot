@@ -1,8 +1,8 @@
 use config::Config as Conf;
 use config::ConfigError;
-use thiserror::Error;
 use secstr::SecUtf8;
-use serde::Deserializer;
+use serde::Deserialize;
+use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -12,15 +12,16 @@ pub enum Error {
     Platform,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, PartialEq)]
 pub struct Config {
-    token: SecUt8,
+    pub discord_token: SecUtf8,
+    pub imgur_id: String,
 }
 
-static PREFIX: &'static str = "waah_";
-static QUALIFIER: &'static str = "io";
-static ORGANISATION: &'static str = "themadprofessor";
-static APPLICATION: &'static str = "waah_bot";
+const PREFIX: &str = "waah_";
+const QUALIFIER: &str = "io";
+const ORGANISATION: &str = "themadprofessor";
+const APPLICATION: &str = "waah_bot";
 
 impl Config {
     pub fn new() -> Result<Config, Error> {
@@ -30,19 +31,10 @@ impl Config {
         let mut conf = Conf::new();
 
         conf.merge(config::File::with_name(
-            dirs.config_dir()
-                .join(APPLICATION + ".toml")
-                .to_str()
-                .unwrap(),
-        ))
-        .map_err(Error::Config)?;
-        conf.merge(config::Environment::with_prefix(PREFIX))
-            .map_err(Error::Config)?;
+            dirs.config_dir().join("waah_bot.toml").to_str().unwrap(),
+        ))?;
+        conf.merge(config::Environment::with_prefix(PREFIX))?;
 
         conf.try_into().map_err(Error::Config)
     }
-}
-
-fn deserialize_secstr<'de, D>(de: D) -> Result<SecUt8, D::Error> where D: Deserializer<'de> {
-    String::deserialize(de)?.into()
 }

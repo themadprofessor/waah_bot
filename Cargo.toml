@@ -10,19 +10,8 @@ directories = "2.0.2"
 thiserror = "1.0.15"
 serde = "1.0"
 serde_derive = "1.0"
-secstr = "0.4.0"
-
-[dependencies.serenity]
-version = "0.8.5"
-features = [
-    "builder",
-    "client",
-    "framework",
-    "gateway",
-    "http",
-    "model",
-    "standard_framework",
-    "utils",
-    "rustls_backend",
-]
-default-features = false
+secstr = { version = "0.4.0", features = ["serde"] }
+serenity = "0.8"
+reqwest = { version = "0.10.4", features = ["blocking"] }
+rand = "0.7.3"
+lazy_static = "1.4.0"
